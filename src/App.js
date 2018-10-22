@@ -26,6 +26,7 @@ class App extends Component {
         deploymentDetails: result
       })
     });
+    console.log("ACCOUNTS:", web3.eth.accounts)
   }
 
   render() {
