@@ -26,7 +26,19 @@ class App extends Component {
         deploymentDetails: result
       })
     });
-    console.log("ACCOUNTS:", web3.eth.accounts)
+    
+  }
+
+  makePayment = async() => {
+    console.log("paying")
+    let fromAccount = await web3.eth.getAccounts()
+    SolarContract.methods.makePayment("1", "20").send({
+      from: fromAccount[0],
+      value: 20
+    })
+    .then(function(receipt){
+      console.log("receipt:", receipt)
+    });
   }
 
   render() {
@@ -65,6 +77,7 @@ class App extends Component {
             :
             null
           }
+          <Button bsStyle="primary" onClick={this.makePayment}>Make Payment</Button>
         </p>
       </div>
     );
