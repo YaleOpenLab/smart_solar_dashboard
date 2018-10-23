@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, ButtonGroup } from 'react-bootstrap';
+import { Button, ButtonGroup, Form, FormGroup, FormControl, Col, ControlLabel } from 'react-bootstrap';
 import SolarContract from './SolarContract'
 import web3 from './Web3';
 import logo from './logo.svg';
@@ -13,7 +13,16 @@ class App extends Component {
       investor: false,
       contractor: false,
       consumer: false,
-      deploymentDetails: null
+      deploymentDetails: null,
+      solarSystemId: '',
+      payout: '',
+      panelSize: '',
+      totalValue: '',
+      contractorAddress: '',
+      consumerAddress: '',
+      solarSystemIdConsumer: '',
+      payment: '',
+      contractorSS: ''
     }
   }
   componentDidMount() {
@@ -26,7 +35,7 @@ class App extends Component {
         deploymentDetails: result
       })
     });
-    
+
   }
 
   makePayment = async() => {
@@ -41,6 +50,206 @@ class App extends Component {
     });
   }
 
+  proposeDeployment = async() => {
+    let {solarSystemId, payout, panelSize, totalValue, contractorAddress, consumerAddress} = this.state;
+    let fromAccount = await web3.eth.getAccounts()
+    SolarContract.methods.proposeDeployment(solarSystemId, payout, panelSize, totalValue, contractorAddress, consumerAddress).send({
+      from: fromAccount[0]
+    })
+    .then(function(receipt){
+      console.log("receipt:", receipt)
+    });
+  }
+
+  confirmDeployment = async(id) => {
+    let fromAccount = await web3.eth.getAccounts()
+    SolarContract.methods.confirmDeployment(id).send({
+      from: fromAccount[0]
+    })
+    .then(function(receipt){
+      console.log("receipt:", receipt)
+    });
+  }
+
+
+  renderActions = () => {
+    if(this.state.consumer) {
+      return (
+        <Form horizontal className='form'>
+
+          <FormGroup controlId="formHorizontalEmail">
+            <Col componentClass={ControlLabel} sm={2}>
+              System to Confirm
+            </Col>
+            <Col sm={10}>
+              <FormControl 
+                type="text"
+                value={this.state.confirmConsumer}
+                placeholder="Enter text"
+                onChange={event => this.setState({confirmConsumer:event.target.value})}
+              />
+            </Col>
+          </FormGroup>
+
+          <FormGroup>
+            <Col smOffset={2} sm={10}>
+              <Button onClick={() => this.confirmDeployment(this.state.confirmConsumer)}>Confirm Deployment</Button>
+            </Col>
+          </FormGroup>
+
+          <FormGroup controlId="formHorizontalEmail">
+            <Col componentClass={ControlLabel} sm={2}>
+              Solar System Id
+            </Col>
+            <Col sm={10}>
+              <FormControl 
+                type="text"
+                value={this.state.solarSystemIdConsumer}
+                placeholder="Enter text"
+                onChange={event => this.setState({solarSystemIdConsumer:event.target.value})}
+              />
+            </Col>
+          </FormGroup>
+
+          <FormGroup controlId="formHorizontalEmail">
+            <Col componentClass={ControlLabel} sm={2}>
+              Payment Amount
+            </Col>
+            <Col sm={10}>
+              <FormControl 
+                type="text"
+                value={this.state.payment}
+                placeholder="Enter text"
+                onChange={event => this.setState({payment:event.target.value})}
+              />
+            </Col>
+          </FormGroup>
+
+          <Button onClick={this.makePayment}>Make Payment</Button>
+
+        </Form>
+      )
+    } else if (this.state.investor) {
+      return (
+        <Form horizontal className='form'>
+          <FormGroup controlId="formHorizontalEmail">
+            <Col componentClass={ControlLabel} sm={2}>
+              Solar System Id
+            </Col>
+            <Col sm={10}>
+              <FormControl 
+                type="text"
+                value={this.state.solarSystemId}
+                placeholder="Enter text"
+                onChange={event => this.setState({solarSystemId:event.target.value})}
+              />
+            </Col>
+          </FormGroup>
+
+          <FormGroup controlId="formHorizontalPassword">
+            <Col componentClass={ControlLabel} sm={2}>
+              Payout
+            </Col>
+            <Col sm={10}>
+              <FormControl 
+                type="text"
+                value={this.state.payout}
+                placeholder="Enter text"
+                onChange={(event) => {this.setState({payout:event.target.value})}} 
+              />
+            </Col>
+          </FormGroup>
+
+          <FormGroup controlId="formHorizontalPassword">
+            <Col componentClass={ControlLabel} sm={2}>
+              PanelSize
+            </Col>
+            <Col sm={10}>
+              <FormControl 
+                type="text"
+                value={this.state.panelSize}
+                placeholder="Enter text"
+                onChange={(event) => {this.setState({panelSize:event.target.value})}} 
+              />
+            </Col>
+          </FormGroup>
+
+          <FormGroup controlId="formHorizontalPassword">
+            <Col componentClass={ControlLabel} sm={2}>
+              TotalValue
+            </Col>
+            <Col sm={10}>
+              <FormControl 
+                type="text"
+                value={this.state.totalValue}
+                placeholder="Enter text"
+                onChange={(event) => {this.setState({totalValue:event.target.value})}} 
+              />
+            </Col>
+          </FormGroup>
+
+          <FormGroup controlId="formHorizontalPassword">
+            <Col componentClass={ControlLabel} sm={2}>
+              Contractor
+            </Col>
+            <Col sm={10}>
+              <FormControl 
+                type="text"
+                value={this.state.contractorAddress}
+                placeholder="Enter text"
+                onChange={(event) => {this.setState({contractorAddress:event.target.value})}} 
+              />
+            </Col>
+          </FormGroup>
+
+          <FormGroup controlId="formHorizontalPassword">
+            <Col componentClass={ControlLabel} sm={2}>
+              Consumer
+            </Col>
+            <Col sm={10}>
+              <FormControl 
+                type="text"
+                value={this.state.consumerAddress}
+                placeholder="Enter text"
+                onChange={(event) => {this.setState({consumerAddress:event.target.value})}} 
+              />
+            </Col>
+          </FormGroup>
+
+          <FormGroup>
+            <Col smOffset={2} sm={10}>
+              <Button onClick={this.proposeDeployment}>Propose Deployment</Button>
+            </Col>
+          </FormGroup>
+        </Form>
+      )
+    } else if (this.state.contractor) {
+      return (
+        <Form horizontal className='form'>
+          <FormGroup>
+            <Col componentClass={ControlLabel} sm={2}>
+              Solar System Id
+            </Col>
+            <Col sm={10}>
+              <FormControl 
+                type="text"
+                value={this.state.contractorSS}
+                placeholder="Enter text"
+                onChange={event => this.setState({contractorSS:event.target.value})}
+              />
+            </Col>
+          </FormGroup>
+
+          <FormGroup>
+            <Col smOffset={2} sm={10}>
+              <Button onClick={() => this.confirmDeployment(this.state.contractorSS)}>Deployed System</Button>
+            </Col>
+          </FormGroup>
+        </Form>
+      )
+    }
+  }
+
   render() {
     return (
       <div className="App">
@@ -49,15 +258,15 @@ class App extends Component {
         </header>
         <p className="App-intro">
           <ButtonGroup>
-            <Button onClick={() => this.setState({investor: true, contractor: false, consumer: false})}>Investor</Button>
-            <Button onClick={() => this.setState({investor: false, contractor: true, consumer: false})}>Contractor</Button>
-            <Button onClick={() => this.setState({investor: false, contractor: false, consumer: true})}>Consumer</Button>
+            <Button bsStyle={this.state.investor ? "success": null} onClick={() => this.setState({investor: true, contractor: false, consumer: false})}>Investor</Button>
+            <Button bsStyle={this.state.contractor ? "success": null} onClick={() => this.setState({investor: false, contractor: true, consumer: false})}>Contractor</Button>
+            <Button bsStyle={this.state.consumer ? "success": null} onClick={() => this.setState({investor: false, contractor: false, consumer: true})}>Consumer</Button>
           </ButtonGroup>
-          <h1>{this.state.investor ? "Investor selected": "Investor not selected"}</h1>
-          <h1>{this.state.contractor ? "contractor selected": "contractor not selected"}</h1>
-          <h1>{this.state.consumer ? "consumer selected": "consumer not selected"}</h1>
+          <h3>
+            PANEL DETAILS
+          </h3>
           {this.state.deploymentDetails ?
-            <div>
+            <div className='info'>
               <h5>
                 {"PanelSize: " + this.state.deploymentDetails['0']}
               </h5>
@@ -65,7 +274,7 @@ class App extends Component {
                 {"TotalValue: $" + this.state.deploymentDetails['1']}
               </h5>
               <h5>
-                {"Consumer Address: ", this.state.deploymentDetails['2']}
+                {"Consumer Address: " + this.state.deploymentDetails['2']}
               </h5>
               <h5>
                 {"PercentageHeld: " + this.state.deploymentDetails['3'] + "%"}
@@ -77,7 +286,7 @@ class App extends Component {
             :
             null
           }
-          <Button bsStyle="primary" onClick={this.makePayment}>Make Payment</Button>
+          {this.renderActions()}
         </p>
       </div>
     );
